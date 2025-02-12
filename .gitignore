@@ -1,6 +1,7 @@
 faults.csv
-tf_venv/
-ctgan_venv/
+.tf_venv/
+.ctgan_venv/
+.tabnet_venv/
 steel_plates copy.ipynb
 balanced_normalized_steel_plates.csv
 logs/
