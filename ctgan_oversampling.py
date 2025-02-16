@@ -1,12 +1,15 @@
 # import packages
 import pandas as pd
+
 pd.options.display.max_columns = None
-from imblearn.over_sampling import SMOTE
+import imblearn.over_sampling
 from sklearn.preprocessing import StandardScaler
 from ctgan import CTGAN
 #from table_evaluator import TableEvaluator
 import warnings
+
 warnings.filterwarnings('ignore')
+
 
 #### FUNCTIONS
 def preprocess_df(df):
@@ -21,8 +24,13 @@ def preprocess_df(df):
                 'bumps': 5,
                 'other_faults': 6}
     df['anomaly'] = pd.from_dummies(df[target_cols]).replace(enc_dict)
-
+    df['outside_global_index'].replace({
+        0: 0,
+        0.5: 1,
+        1: 2
+    }, inplace = True)
     df.drop(target_cols, axis=1, inplace=True)
+    df.drop('typeofsteel_a400', axis=1, inplace=True)
     df.drop(391, inplace=True)
 
     return df
@@ -33,7 +41,7 @@ def smote_oversampling(df):
 
     X = df_no256.drop('anomaly', axis=1)
     y = df_no256['anomaly']
-    sm = SMOTE()
+    sm = imblearn.over_sampling.SMOTE()
     X_res, y_res = sm.fit_resample(X, y)
     df_no256_over = pd.merge(pd.DataFrame(X_res), pd.DataFrame(y_res), right_index=True, left_index=True)
 
@@ -48,7 +56,7 @@ def sample_count(df: pd.DataFrame) -> pd.DataFrame:
     return anomaly_count
 
 
-def ctgan_oversampling(df: pd.DataFrame, discrete_cols: list, n_samples : int = 0) -> pd.DataFrame:
+def ctgan_oversampling(df: pd.DataFrame, discrete_cols: list, n_samples: int = 0) -> pd.DataFrame:
     anomaly_count = sample_count(df)
     for idx in anomaly_count.index:
         print(f"Processing anomaly category: {idx}")
@@ -88,6 +96,7 @@ def scale_df(df: pd.DataFrame, bin_cols: list) -> pd.DataFrame:
     df_non_bin_norm = pd.DataFrame(non_bin_norm, columns=df_non_bin.columns)
     df = pd.concat([df_non_bin_norm, df[bin_cols]], axis=1)
     return df
+
 
 ### END FUNCTIONS
 
