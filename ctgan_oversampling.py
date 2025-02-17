@@ -1,13 +1,12 @@
 # import packages
 import pandas as pd
-
-pd.options.display.max_columns = None
 import imblearn.over_sampling
 from sklearn.preprocessing import StandardScaler
 from ctgan import CTGAN
 #from table_evaluator import TableEvaluator
 import warnings
 
+pd.options.display.max_columns = None
 warnings.filterwarnings('ignore')
 
 
@@ -41,7 +40,7 @@ def smote_oversampling(df):
 
     X = df_no256.drop('anomaly', axis=1)
     y = df_no256['anomaly']
-    sm = imblearn.over_sampling.SMOTE()
+    sm = imblearn.over_sampling.SMOTENC(categorical_features = [11, 19])
     X_res, y_res = sm.fit_resample(X, y)
     df_no256_over = pd.merge(pd.DataFrame(X_res), pd.DataFrame(y_res), right_index=True, left_index=True)
 
