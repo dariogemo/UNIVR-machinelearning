@@ -18,7 +18,6 @@ def import_csv(file_path: str) -> pd.DataFrame:
     return df
 
 def create_tensors(df: pd.DataFrame, target: str, cat_features, device: torch.device):
-
     col_to_drop = cat_features + [target]
     X_num = df.drop(col_to_drop, axis=1)
     X_cat = df[cat_features].astype(np.int64)
@@ -70,9 +69,6 @@ def compile_transformer(n_cont_features: int, cat_cardinalities, d_out: int, dev
 
 def train_transformer(model: FTTransformer, optimizer: object, loss_fn: object, epochs: int, train_loader: DataLoader,
                       device: torch.device) -> FTTransformer:
-    #X_num_train, X_cat_train, y_train = tensors[0].to(device), tensors[2].to(device), tensors[4].to(device)
-    #X_num_test, X_cat_test, y_test = tensors[1].to(device), tensors[3].to(device), tensors[5].to(device)
-
     for epoch in tqdm(range(epochs)):
         model.train()
         for X_num_batch, X_cat_batch, y_batch in train_loader:
@@ -90,7 +86,6 @@ def get_prediction(model: FTTransformer, X_num_test: torch.Tensor, X_cat_test: t
     model.eval()
     with torch.no_grad():
         pred = model(X_num_test, X_cat_test).argmax(dim=1)  # Get predicted classes
-        #pred = pred.numpy() if pred.device == torch.device('cpu') else pred.cpu().numpy()
 
     return pred
 
