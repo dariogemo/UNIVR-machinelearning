@@ -18,6 +18,21 @@ def import_csv(file_path: str) -> pd.DataFrame:
     return df
 
 def create_tensors(df: pd.DataFrame, target: str, cat_features, device: torch.device):
+    """
+    Extracts arrays from the input dataframe and converts them into tensors to train a transformer.
+
+
+    :param df: input dataframe
+    :param target: the target column in df
+    :param cat_features: the categorical columns in df
+    :param device: the device where the tensors will be moved
+    :return Tensor: tensor with the numerical data to train the transformer
+    :return Tensor: tensor with the numerical data to test the transformer
+    :return Tensor: tensor with the categorical data to train the transformer
+    :return Tensor: tensor with the categorical data to test the transformer
+    :return Tensor: tensor with the target data to train the transformer
+    :return Tensor: tensor with the target data to test the transformer
+    """
     col_to_drop = cat_features + [target]
     X_num = df.drop(col_to_drop, axis=1)
     X_cat = df[cat_features].astype(np.int64)
@@ -40,6 +55,15 @@ def create_tensors(df: pd.DataFrame, target: str, cat_features, device: torch.de
 
 
 def create_dataloader(batch_size: int, X_num_train: torch.Tensor, X_cat_train: torch.Tensor, y_train: torch.Tensor) -> DataLoader:
+    """
+    Create an iterable over the given dataset with a sample. Should be used with the train dataset
+
+    :param batch_size: the sample size
+    :param X_num_train: the numerical tensor
+    :param X_cat_train: the categorical tensor
+    :param y_train: the target tensor
+    :return: iterator over the dataset
+    """
     train_dataset = TensorDataset(X_num_train, X_cat_train, y_train)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
@@ -47,6 +71,12 @@ def create_dataloader(batch_size: int, X_num_train: torch.Tensor, X_cat_train: t
 
 
 def get_cardinalities(X_cat_train: torch.Tensor) -> list:
+    """
+    Get the cardinality from the categorical tensor columns.
+
+    :param X_cat_train:
+    :return: list of how many unique values in the tensor columns
+    """
     card_0 = len(X_cat_train[:, 0].unique())
     card_1 = len(X_cat_train[:, 1].unique())
 
@@ -54,6 +84,17 @@ def get_cardinalities(X_cat_train: torch.Tensor) -> list:
 
 
 def compile_transformer(n_cont_features: int, cat_cardinalities, d_out: int, device: torch.device):
+    """
+    Create a FTTransformer object and compile it.
+
+    :param n_cont_features: how many continuous features to use
+    :param cat_cardinalities: cardinality of categorical features
+    :param d_out: the output dimension
+    :param device: the device where the model will be moved
+    :return: the FTTransformer object
+    :return: the adam optimizer
+    :return: the crossentropy loss
+    """
     model = FTTransformer(
         n_cont_features=n_cont_features,
         cat_cardinalities=cat_cardinalities,
@@ -67,8 +108,19 @@ def compile_transformer(n_cont_features: int, cat_cardinalities, d_out: int, dev
     return model, optimizer, loss_fn
 
 
-def train_transformer(model: FTTransformer, optimizer: object, loss_fn: object, epochs: int, train_loader: DataLoader,
+def train_transformer(model: FTTransformer, optimizer: torch.optim.optimizer, loss_fn: torch.nn.CrossEntropyLoss, epochs: int, train_loader: DataLoader,
                       device: torch.device) -> FTTransformer:
+    """
+    Train the transformer on the given dataset.
+
+    :param model: the FTTransformer object to train
+    :param optimizer: the optimizer of the model
+    :param loss_fn: the loss of the model
+    :param epochs: for how many epochs the FTTransformer will be trained
+    :param train_loader: the iterable of the train dataset with the batch size
+    :param device: the device where the model is
+    :return:
+    """
     for epoch in tqdm(range(epochs)):
         model.train()
         for X_num_batch, X_cat_batch, y_batch in train_loader:
@@ -83,6 +135,15 @@ def train_transformer(model: FTTransformer, optimizer: object, loss_fn: object, 
 
 
 def get_prediction(model: FTTransformer, X_num_test: torch.Tensor, X_cat_test: torch.Tensor) -> torch.Tensor:
+    """
+    Use the FTTransformer to predict the anomaly score of the given dataset.
+
+
+    :param model: the FTTransformer object
+    :param X_num_test: The numerical test tensor
+    :param X_cat_test: the categorical test tensor
+    :return: the predicted tensor of the target variable
+    """
     model.eval()
     with torch.no_grad():
         pred = model(X_num_test, X_cat_test).argmax(dim=1)  # Get predicted classes

@@ -41,7 +41,6 @@ def preprocess_df(df: pd.DataFrame) -> pd.DataFrame:
     }, inplace = True)
     df.drop(target_cols, axis=1, inplace=True)
     df.drop('typeofsteel_a400', axis=1, inplace=True)
-    df.drop(391, inplace=True)
 
     return df
 
@@ -151,6 +150,7 @@ if __name__ == '__main__':
 
     # Make data more usable
     df = preprocess_df(df)
+    df.drop(391, inplace=True)
 
     # Over-sample with SMOTE until all class have at least the same number of samples as the class with the fourth biggest n. of samples
     df_smote = smote_oversampling(df)
