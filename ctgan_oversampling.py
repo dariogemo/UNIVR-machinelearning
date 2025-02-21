@@ -11,19 +11,19 @@ warnings.filterwarnings('ignore')
 
 
 #### FUNCTIONS
-def preprocess_df(df: pd.DataFrame) -> pd.DataFrame:
+def preprocess_df(dataframe: pd.DataFrame) -> pd.DataFrame:
     """
     Takes a pandas dataframe and makes some transformations.
     Lowers the columns, removes OHE of the target variable, encodes "outside_global_index"
     variable, drops "typeofsteel_a400", removes row 391(outlier).
 
-    :param df: the initial dataframe
+    :param dataframe: the initial dataframe
     :return: the processed dataframe
     """
-    if not isinstance(df, pd.DataFrame):
+    if not isinstance(dataframe, pd.DataFrame):
         print('The dataframe must be a pandas dataframe')
 
-    df.columns = map(str.lower, df.columns)  # lower columns
+    dataframe.columns = map(lambda x: x.lower(), dataframe.columns)
 
     target_cols: list = ['pastry', 'z_scratch', 'k_scatch', 'stains', 'dirtiness', 'bumps', 'other_faults']
     enc_dict: dict = {'pastry': 0,
@@ -33,29 +33,29 @@ def preprocess_df(df: pd.DataFrame) -> pd.DataFrame:
                 'dirtiness': 4,
                 'bumps': 5,
                 'other_faults': 6}
-    df['anomaly'] = pd.from_dummies(df[target_cols]).replace(enc_dict)
-    df['outside_global_index'].replace({
+    dataframe['anomaly'] = pd.from_dummies(dataframe[target_cols]).replace(enc_dict)
+    dataframe['outside_global_index'].replace({
         0: 0,
         0.5: 1,
         1: 2
     }, inplace = True)
-    df.drop(target_cols, axis=1, inplace=True)
-    df.drop('typeofsteel_a400', axis=1, inplace=True)
+    dataframe.drop(target_cols, axis=1, inplace=True)
+    dataframe.drop('typeofsteel_a400', axis=1, inplace=True)
 
-    return df
+    return dataframe
 
 
-def smote_oversampling(df: pd.DataFrame) -> pd.DataFrame:
+def smote_oversampling(dataframe: pd.DataFrame) -> pd.DataFrame:
     """
     Over-samples the dataframe class target until each sample count is = to the sample
     count of the fourth numerous target variable.
 
 
-    :param df: the dataframe to over-sample
+    :param dataframe: the dataframe to over-sample
     :return: the oversampled dataframe
     """
-    df.dropna(inplace=True)
-    df_no256 = df[(df['anomaly'] != 2) & (df['anomaly'] != 5) & (df['anomaly'] != 6)]
+    dataframe.dropna(inplace=True)
+    df_no256 = dataframe[(dataframe['anomaly'] != 2) & (dataframe['anomaly'] != 5) & (dataframe['anomaly'] != 6)]
 
     X = df_no256.drop('anomaly', axis=1)
     y = df_no256['anomaly']
@@ -63,40 +63,40 @@ def smote_oversampling(df: pd.DataFrame) -> pd.DataFrame:
     X_res, y_res = sm.fit_resample(X, y)
     df_no256_over = pd.merge(pd.DataFrame(X_res), pd.DataFrame(y_res), right_index=True, left_index=True)
 
-    df_smote = pd.concat([df_no256_over, df[(df['anomaly'] == 2) | (df['anomaly'] == 5) | (df['anomaly'] == 6)]],
-                         axis=0)
-    df_smote.reset_index(drop=True, inplace=True)
-    return df_smote
+    df_sm = pd.concat([df_no256_over, dataframe[(dataframe['anomaly'] == 2) | (dataframe['anomaly'] == 5) | (dataframe['anomaly'] == 6)]],
+                      axis=0)
+    df_sm.reset_index(drop=True, inplace=True)
+    return df_sm
 
 
-def sample_count(df: pd.DataFrame) -> pd.DataFrame:
+def sample_count(dataframe: pd.DataFrame) -> pd.DataFrame:
     """
     Counts the number of each "anomaly" in the dataframe.
 
 
-    :param df: the dataframe with the "anomaly" column
+    :param dataframe: the dataframe with the "anomaly" column
     :return: the dataframe with the "anomaly" column
     """
-    anomaly_count = pd.DataFrame(df['anomaly'].value_counts()).sort_index()
+    anomaly_count = pd.DataFrame(dataframe['anomaly'].value_counts()).sort_index()
     return anomaly_count
 
 
-def ctgan_oversampling(df: pd.DataFrame, discrete_cols: list, n_samples: int = 0) -> pd.DataFrame:
+def ctgan_oversampling(dataframe: pd.DataFrame, discrete_cols: list, n_samples: int = 0) -> pd.DataFrame:
     """
     Over-samples the dataframe class target until each samples count is = to the sample count
     of the biggest target variable plus the n_samples integer.
 
 
-    :param df: dataframe to over-sample
+    :param dataframe: dataframe to over-sample
     :param discrete_cols: list of the discrete column names in df
     :param n_samples: number to samples to over-sample
     :return:
     """
-    anomaly_count = sample_count(df)
+    anomaly_count = sample_count(dataframe)
     for idx in anomaly_count.index:
         print(f"Processing anomaly category: {idx}")
 
-        sub_df = df[df['anomaly'] == idx]  # df for single anomaly
+        sub_df = dataframe[dataframe['anomaly'] == idx]  # df for single anomaly
 
         if sub_df.empty:
             print(f"Skipping idx {idx}: No samples found.")
@@ -117,29 +117,29 @@ def ctgan_oversampling(df: pd.DataFrame, discrete_cols: list, n_samples: int = 0
                 table_evaluator = TableEvaluator(sub_df, synthetic_data[:673], cat_cols=discrete_cols)
                 table_evaluator.visual_evaluation()
                 '''
-            df = pd.concat([df, synthetic_data], axis=0)  # merge real and synthetic data
+            dataframe = pd.concat([dataframe, synthetic_data], axis=0)  # merge real and synthetic data
         else:
             print(f"Skipping idx {idx}: No synthetic data needed.")
 
-    df.reset_index(drop=True, inplace=True)
-    return df
+    dataframe.reset_index(drop=True, inplace=True)
+    return dataframe
 
 
-def scale_df(df: pd.DataFrame, bin_cols: list) -> pd.DataFrame:
+def scale_df(dataframe: pd.DataFrame, bin_cols: list) -> pd.DataFrame:
     """
     Normalize the dataframe using StandardScaler.
 
-    :param df: the dataframe to normalize
+    :param dataframe: the dataframe to normalize
     :param bin_cols: the list of the categorical columns in the dataframe
     :return: the normalized dataframe
     """
-    df_non_bin = df.drop(bin_cols, axis=1)  # drop discrete columns
+    df_non_bin = dataframe.drop(bin_cols, axis=1)  # drop discrete columns
 
     sc = StandardScaler()
     non_bin_norm = sc.fit_transform(df_non_bin)
     df_non_bin_norm = pd.DataFrame(non_bin_norm, columns=df_non_bin.columns)
-    df = pd.concat([df_non_bin_norm, df[bin_cols]], axis=1)
-    return df
+    dataframe = pd.concat([df_non_bin_norm, dataframe[bin_cols]], axis=1)
+    return dataframe
 
 
 ### END FUNCTIONS

@@ -93,7 +93,7 @@ def compile_transformer(n_cont_features: int, cat_cardinalities, d_out: int, dev
     :param device: the device where the model will be moved
     :return: the FTTransformer object
     :return: the adam optimizer
-    :return: the crossentropy loss
+    :return: the cross_entropy loss
     """
     model = FTTransformer(
         n_cont_features=n_cont_features,
@@ -108,7 +108,7 @@ def compile_transformer(n_cont_features: int, cat_cardinalities, d_out: int, dev
     return model, optimizer, loss_fn
 
 
-def train_transformer(model: FTTransformer, optimizer: torch.optim.optimizer, loss_fn: torch.nn.CrossEntropyLoss, epochs: int, train_loader: DataLoader,
+def train_transformer(model: FTTransformer, optimizer, loss_fn: torch.nn.CrossEntropyLoss, epochs: int, train_loader: DataLoader,
                       device: torch.device) -> FTTransformer:
     """
     Train the transformer on the given dataset.
@@ -121,7 +121,7 @@ def train_transformer(model: FTTransformer, optimizer: torch.optim.optimizer, lo
     :param device: the device where the model is
     :return:
     """
-    for epoch in tqdm(range(epochs)):
+    for _ in tqdm(range(epochs)):
         model.train()
         for X_num_batch, X_cat_batch, y_batch in train_loader:
             X_num_batch, X_cat_batch, y_batch = X_num_batch.to(device), X_cat_batch.to(device), y_batch.to(device)
@@ -158,24 +158,24 @@ def accuracy_ftt(y_pred: torch.Tensor, y_test: torch.Tensor) -> int:
 
 
 if __name__ == '__main__':
-    device = create_device()
+    dev = create_device()
 
-    df = import_csv('csv/balanced_normalized_steel_plates.csv')
-    X_num_train, X_num_test, X_cat_train, X_cat_test, y_train, y_test = create_tensors(df, 'anomaly', ['typeofsteel_a300', 'outside_global_index'], device)
+    Df = import_csv('csv/balanced_normalized_steel_plates.csv')
+    X_n_train, X_n_test, X_c_train, X_c_test, y_tr, y_te = create_tensors(Df, 'anomaly', ['typeofsteel_a300', 'outside_global_index'], dev)
 
-    train_loader = create_dataloader(512, X_num_train, X_cat_train, y_train)
+    tr_loader = create_dataloader(512, X_n_train, X_c_train, y_tr)
 
-    cardinalities = get_cardinalities(X_cat_train)
+    card = get_cardinalities(X_c_train)
 
-    model, optimizer, loss_fn = compile_transformer(X_num_train.shape[1], cardinalities, 7, device)
+    transformer, adam, loss_funct = compile_transformer(X_n_train.shape[1], card, 7, dev)
 
-    model = train_transformer(model, optimizer, loss_fn, epochs=5, train_loader=train_loader, device=device)
+    transformer = train_transformer(transformer, adam, loss_funct, epochs=5, train_loader=tr_loader, device=dev)
 
-    y_pred = get_prediction(model, X_num_test, X_cat_test)
-    print(type(y_test))
-    accuracy = accuracy_ftt(y_test, y_pred)
+    y_pr = get_prediction(transformer, X_n_test, X_c_test)
+    print(type(y_te))
+    acc = accuracy_ftt(y_te, y_pr)
 
-    print(f"Test Accuracy: {accuracy}%")
+    print(f"Test Accuracy: {acc}%")
 
 else:
     pass
