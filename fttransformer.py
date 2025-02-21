@@ -20,36 +20,36 @@ def import_csv(file_path: str) -> pd.DataFrame:
 def create_tensors(df: pd.DataFrame, target: str, cat_features, device: torch.device):
     """
     Extracts arrays from the input dataframe and converts them into tensors to train a transformer.
-
-
-    :param df: input dataframe
-    :param target: the target column in df
-    :param cat_features: the categorical columns in df
-    :param device: the device where the tensors will be moved
-    :return Tensor: tensor with the numerical data to train the transformer
-    :return Tensor: tensor with the numerical data to test the transformer
-    :return Tensor: tensor with the categorical data to train the transformer
-    :return Tensor: tensor with the categorical data to test the transformer
-    :return Tensor: tensor with the target data to train the transformer
-    :return Tensor: tensor with the target data to test the transformer
     """
     col_to_drop = cat_features + [target]
     X_num = df.drop(col_to_drop, axis=1)
     X_cat = df[cat_features].astype(np.int64)
-    y = df['anomaly'].astype(np.int64)
+    y = df[target].astype(np.int64)  # Usa 'target' invece di 'anomaly'
 
-    X_num_train, X_num_test, X_cat_train, X_cat_test, y_train, y_test = train_test_split(X_num, X_cat, y, test_size=0.2)
+    X_num_train, X_num_test, X_cat_train, X_cat_test, y_train, y_test = train_test_split(
+        X_num, X_cat, y, test_size=0.2
+    )
 
-    X_num_train, X_num_test = X_num_train.to_numpy(dtype=np.float32), X_num_test.to_numpy(dtype=np.float32)
-    X_cat_train, X_cat_test = X_cat_train.to_numpy(dtype=np.int64), X_cat_test.to_numpy(dtype=np.int64)
-    y_train, y_test = y_train.to_numpy(dtype=np.int64), y_test.to_numpy(dtype=np.int64)
+    X_num_train = X_num_train.to_numpy(dtype=np.float32)
+    X_num_test = X_num_test.to_numpy(dtype=np.float32)
+    X_cat_train = X_cat_train.to_numpy(dtype=np.int64)
+    X_cat_test = X_cat_test.to_numpy(dtype=np.int64)
+    y_train = y_train.to_numpy(dtype=np.int64)
+    y_test = y_test.to_numpy(dtype=np.int64)
 
-    X_num_train, X_num_test = map(torch.tensor, (X_num_train, X_num_test))
-    X_cat_train, X_cat_test = map(torch.tensor, (X_cat_train, X_cat_test))
-    y_train, y_test = map(torch.tensor, (y_train, y_test))
+    X_num_train = torch.tensor(X_num_train, dtype=torch.float32)
+    X_num_test = torch.tensor(X_num_test, dtype=torch.float32)
+    X_cat_train = torch.tensor(X_cat_train, dtype=torch.int64)
+    X_cat_test = torch.tensor(X_cat_test, dtype=torch.int64)
+    y_train = torch.tensor(y_train, dtype=torch.int64)
+    y_test = torch.tensor(y_test, dtype=torch.int64)
 
-    X_num_train, X_cat_train, y_train = X_num_train.to(device), X_cat_train.to(device), y_train.to(device)
-    X_num_test, X_cat_test, y_test = X_num_test.to(device), X_cat_test.to(device), y_test.to(device)
+    X_num_train = X_num_train.to(device)
+    X_num_test = X_num_test.to(device)
+    X_cat_train = X_cat_train.to(device)
+    X_cat_test = X_cat_test.to(device)
+    y_train = y_train.to(device)
+    y_test = y_test.to(device)
 
     return X_num_train, X_num_test, X_cat_train, X_cat_test, y_train, y_test
 
