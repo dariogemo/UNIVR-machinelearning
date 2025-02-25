@@ -74,7 +74,7 @@ def ctgan_oversampling(dataframe: pd.DataFrame, discrete_cols: list, n_samples: 
 
         if num_samples > 0:
             ctgan = CTGAN(batch_size=100)
-            ctgan.fit(sub_df, discrete_columns = discrete_cols)  # fit ctgan
+            ctgan.fit(sub_df, discrete_columns=discrete_cols, epochs=1000)  # fit ctgan
 
             synthetic_data = ctgan.sample(num_samples)  # generate synthetic data
 
@@ -88,7 +88,7 @@ def ctgan_oversampling(dataframe: pd.DataFrame, discrete_cols: list, n_samples: 
                 for filename in os.listdir(folder_path):
                     name, ext = os.path.splitext(filename)
 
-                    if 'smotenc' in name:
+                    if 'smotenc' in name or 'ctgan' in name:
                         continue
 
                     new_name = f"{name}_ctgan{ext}"
@@ -115,11 +115,11 @@ if __name__ == '__main__':
     df.drop(391, inplace=True)
 
     # Over-sample with SMOTE until all class have at least the same number of samples as the class with the fourth biggest n. of samples
-    df_smote = smote_oversampling(df)
-    print('Anomaly count after oversampling with SMOTE:\n', sample_count(df_smote), '\n-----------------------------')
+    #df_smote = smote_oversampling(df)
+    #print('Anomaly count after oversampling with SMOTE:\n', sample_count(df_smote), '\n-----------------------------')
 
     # Over-sample with CTGAN, bringing all the classes to 1500 samples
-    df = ctgan_oversampling(df_smote, ['typeofsteel_a300', 'outside_global_index', 'anomaly'], 327, evaluate_data=True)
+    df = ctgan_oversampling(df, ['typeofsteel_a300', 'outside_global_index', 'anomaly'], 0, evaluate_data=True)
     print('Anomaly count after oversampling with CTGAN:\n', sample_count(df), '\n-----------------------------')
 
     # Normalize old and new synthetic data

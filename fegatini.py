@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
-from typing import List
+from typing import List, Tuple
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 
 
 def preprocess_df(dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -58,3 +59,22 @@ def scale_df(dataframe: pd.DataFrame, bin_cols: List[str]) -> pd.DataFrame:
 def rounded_mean(array):
     mean = np.mean(array)
     return round(mean, 2)
+
+
+def metrics_of_prediction(y_t: np.array, y_pred: np.array, fold_no: int) -> Tuple[float, float, float, float]:
+    """
+    Computes and returns accuracy, precision, recall and f1 score of some prediction.
+
+
+    :param y_t: the true target variable
+    :param y_pred: the predicted target variable
+    :param fold_no: the fold number of the cross validation fold
+    :return: the accuracy, precision, recall and f1 score
+    """
+    accuracy = accuracy_score(y_t, y_pred) * 100
+    precision = float(precision_score(y_t, y_pred, average = "macro") * 100)
+    recall = float(recall_score(y_t, y_pred, average = "macro") * 100)
+    f1 = float(f1_score(y_t, y_pred, average = "macro") * 100)
+    print(f'Accuracy score for fold {fold_no}: {round(accuracy, 2)}%')
+
+    return accuracy, precision, recall, f1

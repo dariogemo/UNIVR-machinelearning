@@ -9,6 +9,15 @@ from fegatini import preprocess_df, scale_df
 
 
 def smotenc_oversampling(dataframe: pd.DataFrame, categorical_features: List[str], target_col: str) -> pd.DataFrame:
+    """
+    Over-samples the dataframe using SMOTENC.
+
+
+    :param dataframe: the dataframe to over-sample
+    :param categorical_features: list of categorical features in the dataframe
+    :param target_col: target column name that needs class balancing
+    :return: the dataframe with over-sampled columns
+    """
     X = dataframe.drop(target_col, axis=1)
     y = dataframe[target_col]
 
@@ -20,7 +29,17 @@ def smotenc_oversampling(dataframe: pd.DataFrame, categorical_features: List[str
     return df_sm
 
 
-def evaluate_data(old_df: pd.DataFrame, new_df: pd.DataFrame, target_col: str, discrete_cols: List[str]):
+def evaluate_data(old_df: pd.DataFrame, new_df: pd.DataFrame, target_col: str, discrete_cols: List[str]) -> None:
+    """
+    Evaluate synthetic data created with SMOTENC. Creates visual evaluation of synthetic data and saves the images in a "Plots" directory.
+
+
+    :param old_df: the dataframe before class balancing
+    :param new_df: the dataframe after class balancing
+    :param target_col: target column name that was over-sampled
+    :param discrete_cols: list of discrete feature names of the dataframe
+    :return: None
+    """
     target_cols = ['Pastry', 'Z_Scratch', 'K_Scatch', 'Stains', 'Dirtiness', 'Bumps', 'Other_Faults']
     len_old = len(old_df)
     synthetic_df = new_df[len_old:]
@@ -40,7 +59,7 @@ def evaluate_data(old_df: pd.DataFrame, new_df: pd.DataFrame, target_col: str, d
         for filename in os.listdir(folder_path):
             name, ext = os.path.splitext(filename)
 
-            if 'ctgan' in name:
+            if 'ctgan' in name or 'smotenc' in name:
                 continue
 
             new_name = f"{name}_smotenc{ext}"
