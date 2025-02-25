@@ -1,8 +1,8 @@
-# import packages
+import os
 import pandas as pd
 import imblearn.over_sampling
 from ctgan import CTGAN
-#from table_evaluator import TableEvaluator
+from table_evaluator import TableEvaluator
 from fegatini import preprocess_df, scale_df
 import warnings
 
@@ -47,7 +47,7 @@ def sample_count(dataframe: pd.DataFrame) -> pd.DataFrame:
     return anomaly_count
 
 
-def ctgan_oversampling(dataframe: pd.DataFrame, discrete_cols: list, n_samples: int = 0) -> pd.DataFrame:
+def ctgan_oversampling(dataframe: pd.DataFrame, discrete_cols: list, n_samples: int = 0, evaluate_data = False) -> pd.DataFrame:
     """
     Over-samples the dataframe class target until each samples count is = to the sample count
     of the biggest target variable plus the n_samples integer.
@@ -56,6 +56,7 @@ def ctgan_oversampling(dataframe: pd.DataFrame, discrete_cols: list, n_samples: 
     :param dataframe: dataframe to over-sample
     :param discrete_cols: list of the discrete column names in df
     :param n_samples: number to samples to over-sample
+    :param evaluate_data: whether to evaluate the over-sampling or not through visual evaluation
     :return:
     """
     anomaly_count = sample_count(dataframe)
@@ -77,12 +78,24 @@ def ctgan_oversampling(dataframe: pd.DataFrame, discrete_cols: list, n_samples: 
 
             synthetic_data = ctgan.sample(num_samples)  # generate synthetic data
 
-            # uncomment the following lines to evaluate the synthetic data for sample n. 6
-            '''
-            if idx == 6:
+            if evaluate_data:
+                target_cols = ['Pastry', 'Z_Scratch', 'K_Scatch', 'Stains', 'Dirtiness', 'Bumps', 'Other_Faults']
+                folder_path = f'Plots/{idx}_{target_cols[idx]}'
+
                 table_evaluator = TableEvaluator(sub_df, synthetic_data[:673], cat_cols=discrete_cols)
-                table_evaluator.visual_evaluation()
-                '''
+                table_evaluator.visual_evaluation(save_dir=folder_path)
+
+                for filename in os.listdir(folder_path):
+                    name, ext = os.path.splitext(filename)
+
+                    if 'smotenc' in name:
+                        continue
+
+                    new_name = f"{name}_ctgan{ext}"
+                    old_file = os.path.join(folder_path, filename)
+                    new_file = os.path.join(folder_path, new_name)
+                    os.rename(old_file, new_file)
+
             dataframe = pd.concat([dataframe, synthetic_data], axis=0)  # merge real and synthetic data
         else:
             print(f"Skipping idx {idx}: No synthetic data needed.")
@@ -106,7 +119,7 @@ if __name__ == '__main__':
     print('Anomaly count after oversampling with SMOTE:\n', sample_count(df_smote), '\n-----------------------------')
 
     # Over-sample with CTGAN, bringing all the classes to 1500 samples
-    df = ctgan_oversampling(df_smote, ['typeofsteel_a300', 'outside_global_index', 'anomaly'], 327)
+    df = ctgan_oversampling(df_smote, ['typeofsteel_a300', 'outside_global_index', 'anomaly'], 327, evaluate_data=True)
     print('Anomaly count after oversampling with CTGAN:\n', sample_count(df), '\n-----------------------------')
 
     # Normalize old and new synthetic data

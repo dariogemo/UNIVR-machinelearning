@@ -24,6 +24,7 @@ def evaluate_data(old_df: pd.DataFrame, new_df: pd.DataFrame, target_col: str, d
     target_cols = ['Pastry', 'Z_Scratch', 'K_Scatch', 'Stains', 'Dirtiness', 'Bumps', 'Other_Faults']
     len_old = len(old_df)
     synthetic_df = new_df[len_old:]
+
     for target in old_df[target_col].unique():
         if target not in synthetic_df[target_col].unique():
             print(f'Target {target} not in synthetic data')
@@ -34,21 +35,17 @@ def evaluate_data(old_df: pd.DataFrame, new_df: pd.DataFrame, target_col: str, d
         folder_path = f'Plots/{target}_{target_cols[target]}'
 
         table_evaluator = TableEvaluator(sub_df, synthetic_df[synthetic_df['anomaly'] == target], cat_cols=discrete_cols)
-        table_evaluator.visual_evaluation(save_dir = folder_path)
+        table_evaluator.visual_evaluation(save_dir=folder_path)
 
-        # Loop through all files in the folder
         for filename in os.listdir(folder_path):
-            # Get file name and extension separately
             name, ext = os.path.splitext(filename)
 
-            # Create new file name
-            new_name = f"{name}_smotenc{ext}"
+            if 'ctgan' in name:
+                continue
 
-            # Build full paths
+            new_name = f"{name}_smotenc{ext}"
             old_file = os.path.join(folder_path, filename)
             new_file = os.path.join(folder_path, new_name)
-
-            # Rename the file
             os.rename(old_file, new_file)
 
 
