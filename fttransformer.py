@@ -160,7 +160,7 @@ def accuracy_ftt(y_pred: torch.Tensor, y_test: torch.Tensor) -> int:
 if __name__ == '__main__':
     dev = create_device()
 
-    Df = import_csv('csv/balanced_normalized_steel_plates.csv')
+    Df = import_csv('csv/smotenc_normalized_steel_plates.csv')
     X_n_train, X_n_test, X_c_train, X_c_test, y_tr, y_te = create_tensors(Df, 'anomaly', ['typeofsteel_a300', 'outside_global_index'], dev)
 
     tr_loader = create_dataloader(512, X_n_train, X_c_train, y_tr)

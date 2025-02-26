@@ -127,6 +127,6 @@ if __name__ == '__main__':
     df_norm.reset_index(drop=True, inplace=True)
 
     # Save the balanced dataset
-    df_norm.to_csv('csv/balanced_normalized_steel_plates.csv')
+    df_norm.to_csv('csv/ctgan_normalized_steel_plates.csv')
 else:
     pass

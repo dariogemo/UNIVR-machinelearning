@@ -88,3 +88,5 @@ if __name__ == '__main__':
     anomaly_count_res = pd.DataFrame(df_norm['anomaly'].value_counts()).sort_index()
     anomaly_count_res.index = ['pastry', 'z_scratch', 'k_scatch', 'stains', 'dirtiness', 'bumps', 'other_faults']
     print(anomaly_count_res)
+
+    df_norm.to_csv('csv/smotenc_normalized_steel_plates.csv')

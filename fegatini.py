@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 from typing import List, Tuple
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, confusion_matrix, ConfusionMatrixDisplay, classification_report
+import matplotlib.pyplot as plt
 
 
 def preprocess_df(dataframe: pd.DataFrame) -> pd.DataFrame:
@@ -78,3 +79,20 @@ def metrics_of_prediction(y_t: np.array, y_pred: np.array, fold_no: int) -> Tupl
     print(f'Accuracy score for fold {fold_no}: {round(accuracy, 2)}%')
 
     return accuracy, precision, recall, f1
+
+
+def plot_cm(y_true: np.array, y_pred: np.array) -> None:
+    """
+    Prints the classification report and the confusion matrix.
+
+
+    :param y_true: the true target variable
+    :param y_pred: the predicted target variable
+    """
+    print(classification_report(y_true, y_pred))
+
+    cm = confusion_matrix(y_true, y_pred)
+    ConfusionMatrixDisplay(cm).plot(cmap="Blues")
+    plt.show()
+
+    return None
