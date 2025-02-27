@@ -55,7 +55,7 @@ def ctgan_oversampling(dataframe: pd.DataFrame, discrete_cols: list, n_samples: 
 
     :param dataframe: dataframe to over-sample
     :param discrete_cols: list of the discrete column names in df
-    :param n_samples: number to samples to over-sample
+    :param n_samples: number of samples to over-sample
     :param evaluate_data: whether to evaluate the over-sampling or not through visual evaluation
     :return:
     """
@@ -124,9 +124,8 @@ if __name__ == '__main__':
 
     # Normalize old and new synthetic data
     df_norm = scale_df(df, ['typeofsteel_a300', 'outside_global_index', 'anomaly']).sample(frac=1)
-    df_norm.reset_index(drop=True, inplace=True)
 
     # Save the balanced dataset
-    df_norm.to_csv('csv/ctgan_normalized_steel_plates.csv')
+    df.to_csv('csv/prova.csv')
 else:
     pass
