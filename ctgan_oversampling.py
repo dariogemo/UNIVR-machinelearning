@@ -119,7 +119,7 @@ if __name__ == '__main__':
     #print('Anomaly count after oversampling with SMOTE:\n', sample_count(df_smote), '\n-----------------------------')
 
     # Over-sample with CTGAN, bringing all the classes to 1500 samples
-    df = ctgan_oversampling(df, ['typeofsteel_a300', 'outside_global_index', 'anomaly'], 0, evaluate_data=True)
+    df = ctgan_oversampling(df, ['typeofsteel_a300', 'outside_global_index', 'anomaly'], 0, evaluate_data=False)
     print('Anomaly count after oversampling with CTGAN:\n', sample_count(df), '\n-----------------------------')
 
     # Normalize old and new synthetic data
