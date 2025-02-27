@@ -76,7 +76,7 @@ def ctgan_oversampling(dataframe: pd.DataFrame, discrete_cols: list, n_samples: 
             ctgan = CTGAN(batch_size=100)
             ctgan.fit(sub_df, discrete_columns=discrete_cols, epochs=1000)  # fit ctgan
 
-            synthetic_data = ctgan.sample(num_samples)  # generate synthetic data
+            synthetic_data = ctgan.sample(num_samples).sample(frac=1)  # generate synthetic data
 
             if evaluate_data:
                 target_cols = ['Pastry', 'Z_Scratch', 'K_Scatch', 'Stains', 'Dirtiness', 'Bumps', 'Other_Faults']
@@ -91,7 +91,7 @@ def ctgan_oversampling(dataframe: pd.DataFrame, discrete_cols: list, n_samples: 
                     if 'smotenc' in name or 'ctgan' in name:
                         continue
 
-                    new_name = f"{name}_ctgan{ext}"
+                    new_name = f"{name}_ctgan_ctgan{ext}"
                     old_file = os.path.join(folder_path, filename)
                     new_file = os.path.join(folder_path, new_name)
                     os.rename(old_file, new_file)
@@ -119,13 +119,13 @@ if __name__ == '__main__':
     #print('Anomaly count after oversampling with SMOTE:\n', sample_count(df_smote), '\n-----------------------------')
 
     # Over-sample with CTGAN, bringing all the classes to 1500 samples
-    df = ctgan_oversampling(df, ['typeofsteel_a300', 'outside_global_index', 'anomaly'], 0, evaluate_data=False)
+    df = ctgan_oversampling(df, ['typeofsteel_a300', 'outside_global_index', 'anomaly'], 0, evaluate_data=True)
     print('Anomaly count after oversampling with CTGAN:\n', sample_count(df), '\n-----------------------------')
 
     # Normalize old and new synthetic data
     df_norm = scale_df(df, ['typeofsteel_a300', 'outside_global_index', 'anomaly']).sample(frac=1)
 
     # Save the balanced dataset
-    df.to_csv('csv/prova.csv')
+    df.to_csv('csv/smotenc_ctgan_normalized_steel_plates.csv')
 else:
     pass
