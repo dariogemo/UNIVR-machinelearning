@@ -3,7 +3,7 @@ import pandas as pd
 import imblearn.over_sampling
 from ctgan import CTGAN
 from table_evaluator import TableEvaluator
-from fegatini import preprocess_df, scale_df
+from utils.general import preprocess_df, scale_df
 import warnings
 
 pd.options.display.max_columns = None
@@ -108,7 +108,7 @@ def ctgan_oversampling(dataframe: pd.DataFrame, discrete_cols: list, n_samples: 
 
 if __name__ == '__main__':
     # Import the data
-    df = pd.read_csv('csv/faults.csv')
+    df = pd.read_csv('../csv/faults.csv')
 
     # Make data more usable
     df = preprocess_df(df)

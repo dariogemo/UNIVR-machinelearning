@@ -3,9 +3,7 @@ import pandas as pd
 from imblearn.over_sampling import SMOTENC
 from typing import List
 from table_evaluator import TableEvaluator
-
-
-from fegatini import preprocess_df, scale_df
+from utils.general import preprocess_df, scale_df
 
 
 def smotenc_oversampling(dataframe: pd.DataFrame, categorical_features: List[str], target_col: str) -> pd.DataFrame:
@@ -70,7 +68,7 @@ def evaluate_data(old_df: pd.DataFrame, new_df: pd.DataFrame, target_col: str, d
 
 if __name__ == '__main__':
     # Import the data
-    df = pd.read_csv('csv/faults.csv')
+    df = pd.read_csv('../csv/faults.csv')
 
     # Make data more usable
     df = preprocess_df(df)
@@ -89,4 +87,4 @@ if __name__ == '__main__':
     anomaly_count_res.index = ['pastry', 'z_scratch', 'k_scatch', 'stains', 'dirtiness', 'bumps', 'other_faults']
     print(anomaly_count_res)
 
-    df_norm.to_csv('csv/smotenc_normalized_steel_plates.csv')
+    #df_norm.to_csv('csv/smotenc_normalized_steel_plates.csv')

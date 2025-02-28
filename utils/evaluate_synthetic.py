@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from fegatini import preprocess_df, scale_df
+from utils.general import preprocess_df, scale_df
 from scipy.stats import wasserstein_distance
 
 
@@ -13,7 +13,7 @@ def load_synthetic_dfs(file_paths: list, method_names: list) -> dict:
 
 
 def load_real_df(file_path: str) -> pd.DataFrame:
-    real_df = pd.read_csv('csv/faults.csv')
+    real_df = pd.read_csv(file_path)
     real_df = preprocess_df(real_df)
     real_df.drop(391, inplace=True)
     real_df = scale_df(real_df, ['typeofsteel_a300', 'outside_global_index', 'anomaly'])
@@ -61,11 +61,11 @@ def evaluate_synthetic_data(file_paths: list, method_names: list, real_file_path
 
 if __name__ == '__main__':
     paths = [
-        'csv/smotenc_normalized_steel_plates.csv',
-        'csv/ctgan_normalized_steel_plates.csv',
-        'csv/smotenc_ctgan_normalized_steel_plates.csv'
+        '../csv/smotenc_normalized_steel_plates.csv',
+        '../csv/ctgan_normalized_steel_plates.csv',
+        '../csv/smotenc_ctgan_normalized_steel_plates.csv'
     ]
 
     method_names_list = ['SMOTENC', 'CTGAN', 'SMOTENC-CTGAN']
 
-    evaluate_synthetic_data(paths, method_names_list, 'csv/faults.csv')
+    evaluate_synthetic_data(paths, method_names_list, '../csv/faults.csv')
