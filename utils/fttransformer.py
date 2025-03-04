@@ -65,7 +65,7 @@ def create_dataloader(batch_size: int, X_num_train: torch.Tensor, X_cat_train: t
     :return: iterator over the dataset
     """
     train_dataset = TensorDataset(X_num_train, X_cat_train, y_train)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     return train_loader
 
 
