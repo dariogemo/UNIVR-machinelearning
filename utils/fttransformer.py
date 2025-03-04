@@ -24,10 +24,10 @@ def create_tensors(df: pd.DataFrame, target: str, cat_features, device: torch.de
     col_to_drop = cat_features + [target]
     X_num = df.drop(col_to_drop, axis=1)
     X_cat = df[cat_features].astype(np.int64)
-    y = df[target].astype(np.int64)  # Usa 'target' invece di 'anomaly'
+    y = df[target].astype(np.int64)
 
     X_num_train, X_num_test, X_cat_train, X_cat_test, y_train, y_test = train_test_split(
-        X_num, X_cat, y, test_size=0.2
+        X_num, X_cat, y, test_size=0.2, stratify=y, random_state=2
     )
 
     X_num_train = X_num_train.to_numpy(dtype=np.float32)
@@ -65,8 +65,7 @@ def create_dataloader(batch_size: int, X_num_train: torch.Tensor, X_cat_train: t
     :return: iterator over the dataset
     """
     train_dataset = TensorDataset(X_num_train, X_cat_train, y_train)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-
+    train_loader = DataLoader(train_dataset, batch_size=batch_size)
     return train_loader
 
 
