@@ -24,6 +24,6 @@ The main models we have used in this project are:
 
 The final metrics for the models' predictions and the average training time are displayed in the following plots.
 
-<img src="Plots/metrics.png" width="700"/>
+<img src="Plots/metrics.png" width="800"/>
 
-<img src="Plots/time.png" width="700"/>
+<img src="Plots/time.png" width="800"/>
