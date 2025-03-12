@@ -1,5 +1,8 @@
 In this final project for the Machine Learning for Data Science course, we have explored and extended various models 
-covered during the lessons, applying them to an industrial problem. Our primary challenge involved implementing neural 
+covered during the lessons, applying them to an industrial problem. [Here](https://github.com/dariogemo/UNIVR-machinelearning/blob/main/requirements.txt)
+you can find the report for the project.
+
+Our primary challenge involved implementing neural 
 networks for tabular data, a less common approach, as neural networks are typically employed for other types of data.  
 With Steel Plates Faults dataset (available on the [UCI Machine Learning repository](https://archive.ics.uci.edu/dataset/198/steel+plates+faults)), 
 we aim to accurately classify surface defects in stainless steel plates, encompassing seven distinct defect types. 
@@ -24,6 +27,6 @@ The main models we have used in this project are:
 
 The final metrics for the models' predictions and the average training time are displayed in the following plots.
 
-<img src="Plots/metrics.png" width="800"/>
+<img src="Plots/metrics.png" width="825"/>
 
-<img src="Plots/time.png" width="800"/>
+<img src="Plots/time.png" width="825"/>
