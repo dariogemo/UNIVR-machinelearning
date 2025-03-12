@@ -1,5 +1,5 @@
 In this final project for the Machine Learning for Data Science course, we have explored and extended various models 
-covered during the lessons, applying them to an industrial problem. [Here](https://github.com/dariogemo/UNIVR-machinelearning/blob/main/requirements.txt)
+covered during the lessons, applying them to an industrial problem. [Here](https://github.com/dariogemo/UNIVR-machinelearning/blob/main/report.pdf)
 you can find the report for the project.
 
 Our primary challenge involved implementing neural 
