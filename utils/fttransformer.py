@@ -12,10 +12,12 @@ def create_device() -> torch.device:
 
     return device
 
+
 def import_csv(file_path: str) -> pd.DataFrame:
     df = pd.read_csv(file_path, index_col=0, header=0)
 
     return df
+
 
 def create_tensors(df: pd.DataFrame, target: str, cat_features, device: torch.device):
     """
@@ -26,8 +28,8 @@ def create_tensors(df: pd.DataFrame, target: str, cat_features, device: torch.de
     X_cat = df[cat_features].astype(np.int64)
     y = df[target].astype(np.int64)
 
-    X_num_train, X_num_test, X_cat_train, X_cat_test, y_train, y_test = train_test_split(
-        X_num, X_cat, y, test_size=0.2, stratify=y, random_state=2
+    X_num_train, X_num_test, X_cat_train, X_cat_test, y_train, y_test = (
+        train_test_split(X_num, X_cat, y, test_size=0.2, stratify=y, random_state=2)
     )
 
     X_num_train = X_num_train.to_numpy(dtype=np.float32)
@@ -54,7 +56,12 @@ def create_tensors(df: pd.DataFrame, target: str, cat_features, device: torch.de
     return X_num_train, X_num_test, X_cat_train, X_cat_test, y_train, y_test
 
 
-def create_dataloader(batch_size: int, X_num_train: torch.Tensor, X_cat_train: torch.Tensor, y_train: torch.Tensor) -> DataLoader:
+def create_dataloader(
+    batch_size: int,
+    X_num_train: torch.Tensor,
+    X_cat_train: torch.Tensor,
+    y_train: torch.Tensor,
+) -> DataLoader:
     """
     Create an iterable over the given dataset with a sample. Should be used with the train dataset
 
@@ -82,7 +89,9 @@ def get_cardinalities(X_cat_train: torch.Tensor) -> list:
     return [card_0, card_1]
 
 
-def compile_transformer(n_cont_features: int, cat_cardinalities, d_out: int, device: torch.device):
+def compile_transformer(
+    n_cont_features: int, cat_cardinalities, d_out: int, device: torch.device
+):
     """
     Create a FTTransformer object and compile it.
 
@@ -107,8 +116,14 @@ def compile_transformer(n_cont_features: int, cat_cardinalities, d_out: int, dev
     return model, optimizer, loss_fn
 
 
-def train_transformer(model: FTTransformer, optimizer, loss_fn: torch.nn.CrossEntropyLoss, epochs: int, train_loader: DataLoader,
-                      device: torch.device) -> FTTransformer:
+def train_transformer(
+    model: FTTransformer,
+    optimizer,
+    loss_fn: torch.nn.CrossEntropyLoss,
+    epochs: int,
+    train_loader: DataLoader,
+    device: torch.device,
+) -> FTTransformer:
     """
     Train the transformer on the given dataset.
 
@@ -123,7 +138,11 @@ def train_transformer(model: FTTransformer, optimizer, loss_fn: torch.nn.CrossEn
     for _ in tqdm(range(epochs)):
         model.train()
         for X_num_batch, X_cat_batch, y_batch in train_loader:
-            X_num_batch, X_cat_batch, y_batch = X_num_batch.to(device), X_cat_batch.to(device), y_batch.to(device)
+            X_num_batch, X_cat_batch, y_batch = (
+                X_num_batch.to(device),
+                X_cat_batch.to(device),
+                y_batch.to(device),
+            )
             optimizer.zero_grad()
             output = model(X_num_batch, X_cat_batch)
             loss = loss_fn(output, y_batch)
@@ -133,7 +152,9 @@ def train_transformer(model: FTTransformer, optimizer, loss_fn: torch.nn.CrossEn
     return model
 
 
-def get_prediction(model: FTTransformer, X_num_test: torch.Tensor, X_cat_test: torch.Tensor) -> torch.Tensor:
+def get_prediction(
+    model: FTTransformer, X_num_test: torch.Tensor, X_cat_test: torch.Tensor
+) -> torch.Tensor:
     """
     Use the FTTransformer to predict the anomaly score of the given dataset.
 
@@ -156,19 +177,25 @@ def accuracy_ftt(y_pred: torch.Tensor, y_test: torch.Tensor) -> int:
     return round(accuracy * 100, 2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     dev = create_device()
 
-    Df = import_csv('../csv/smotenc_normalized_steel_plates.csv')
-    X_n_train, X_n_test, X_c_train, X_c_test, y_tr, y_te = create_tensors(Df, 'anomaly', ['typeofsteel_a300', 'outside_global_index'], dev)
+    Df = import_csv("../csv/smotenc_normalized_steel_plates.csv")
+    X_n_train, X_n_test, X_c_train, X_c_test, y_tr, y_te = create_tensors(
+        Df, "anomaly", ["typeofsteel_a300", "outside_global_index"], dev
+    )
 
     tr_loader = create_dataloader(512, X_n_train, X_c_train, y_tr)
 
     card = get_cardinalities(X_c_train)
 
-    transformer, adam, loss_funct = compile_transformer(X_n_train.shape[1], card, 7, dev)
+    transformer, adam, loss_funct = compile_transformer(
+        X_n_train.shape[1], card, 7, dev
+    )
 
-    transformer = train_transformer(transformer, adam, loss_funct, epochs=5, train_loader=tr_loader, device=dev)
+    transformer = train_transformer(
+        transformer, adam, loss_funct, epochs=5, train_loader=tr_loader, device=dev
+    )
 
     y_pr = get_prediction(transformer, X_n_test, X_c_test)
     print(type(y_te))
